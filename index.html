@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OxenFlace — Sites web interactifs, Laravel 12 & Blade</title>
+<meta name="description" content="OxenFlace, développeur freelance à Madagascar, conçoit des sites web interactifs sur mesure avec Laravel 12 & Blade.">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<script>
+  /* Applique le thème mémorisé avant le rendu, pour éviter tout flash de couleur */
+  (function(){
+    try{
+      if(localStorage.getItem('oxenflace-theme') === 'light'){
+        document.documentElement.setAttribute('data-theme','light');
+      }
+    }catch(e){}
+  })();
+</script>
+<style>
+  /* Polices auto-hébergées, 100% hors-ligne (aucun appel réseau) */
+  @font-face{
+    font-family:'Poppins';
+    src:url('fonts/Poppins-Regular.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Poppins';
+    src:url('fonts/Poppins-Bold.ttf') format('truetype');
+    font-weight:700; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Carlito';
+    src:url('fonts/Carlito-Regular.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Carlito';
+    src:url('fonts/Carlito-Bold.ttf') format('truetype');
+    font-weight:700; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Carlito';
+    src:url('fonts/Carlito-Italic.ttf') format('truetype');
+    font-weight:400; font-style:italic; font-display:swap;
+  }
+  @font-face{
+    font-family:'Liberation Mono';
+    src:url('fonts/LiberationMono-Regular.ttf') format('truetype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Lora Italic';
+    src:url('fonts/Lora-Italic-Variable.ttf') format('truetype-variations');
+    font-weight:400 600; font-style:italic; font-display:swap;
+  }
+  :root{
+    --ink:#F4F1EA;
+    --ink-dim:#A8A29A;
+    --bg:#121110;
+    --bg-alt:#1A1815;
+    --panel:#1E1B17;
+    --line:#332E28;
+    --orange:#EF4F00;
+    --orange-dim:#B23D02;
+    --orange-light:#FF8A3D;
+    --orange-gradient:linear-gradient(135deg, var(--orange-light) 0%, var(--orange-dim) 100%);
+    --thumb-gradient:linear-gradient(135deg, var(--orange-dim) 0%, #201c17 70%);
+    --wm-color:rgba(244,241,234,0.08);
+    --header-bg:rgba(18,17,16,0.88);
+    --radius:2px;
+    color-scheme:dark;
+  }
+  [data-theme="light"]{
+    --ink:#1C1912;
+    --ink-dim:#6B6457;
+    --bg:#FAF8F4;
+    --bg-alt:#F1ECE2;
+    --panel:#FFFFFF;
+    --line:#E4DDCE;
+    --header-bg:rgba(250,248,244,0.88);
+    /* Gradients éclaircis (palette "Sunset View") pour rester clairs et naturels en mode jour, tout en gardant la teinte orange du logo */
+    --orange-gradient:linear-gradient(135deg, #FF9D51 0%, #F5B297 100%);
+    --thumb-gradient:linear-gradient(135deg, #F5B297 0%, #F5D6A2 55%, #F5E4C4 100%);
+    --wm-color:rgba(28,25,18,0.08);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Carlito',Calibri,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    transition:background .2s ease, color .2s ease;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  .wrap{
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+  h1,h2,h3{
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    line-height:1.1;
+  }
+  .mono{
+    font-family:'Liberation Mono',monospace;
+    font-size:0.8rem;
+  }
+  /* accent "façon luxe" pour les passages mis en avant */
+  .lux{
+    font-family:'Lora Italic',serif;
+    font-style:italic;
+    font-weight:500;
+    color:var(--orange);
+    letter-spacing:0.01em;
+  }
+  ::selection{background:var(--orange);color:#121110;}
+
+  /* NAV */
+  header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:var(--header-bg);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 28px;
+    max-width:1120px;
+    margin:0 auto;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    transition: transform .5s ease;
+  }
+  .logo:hover{
+    transform: scaleX(1.05);
+  }
+  .logo img{height:34px;width:auto;}
+  .footer-brand .logo img{height:30px;}
+  .nav-links{
+    display:flex;
+    gap:34px;
+    font-size:0.92rem;
+    font-weight:500;
+  }
+  .nav-links a{
+    color:var(--ink-dim);
+    transition:color .15s ease;
+    position:relative;
+  }
+  .nav-links a:hover, .nav-links a:focus-visible{color:var(--ink);}
+  .nav-links a::after{
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 1px;
+    background: var(--orange);
+    transform: scale(0);
+    transform-origin: left;
+    transition: transform .5s ease;
+  }
+  .nav-links a:hover::after,.nav-links a:focus-visible::after{
+    transform: scaleX(1);
+  }
+  .nav-cta{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--orange-gradient);
+    color:#161311;
+    font-weight:700;
+    font-size:0.88rem;
+    padding:10px 18px;
+    border-radius:var(--radius);
+    transition:background .15s ease;
+    transform: translateX(120px);
+  }
+  .nav-cta:hover{filter: brightness(1.12);}
+  .burger{display:none;background:none;border:none;color:var(--ink);font-size:1.6rem;cursor:pointer;}
+  .theme-toggle{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:38px;
+    height:38px;
+    border:1px solid var(--line);
+    background:none;
+    border-radius:50%;
+    color:var(--ink);
+    font-size:1rem;
+    cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .theme-toggle:hover{border-color:var(--orange);}
+  .nav-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-left:18px;
+  }
+  .lang-toggle{
+    font-family:'Liberation Mono',monospace;
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.02em;
+  }
+
+  /* HERO */
+  .hero{
+    padding:96px 0 88px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:56px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    color:var(--orange);
+    font-size:0.82rem;
+    margin-bottom:22px;
+    gap: 0;
+  }
+  .eyebrow .decrypt-char{
+    display: inline-block;
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;height:1px;background:var(--orange);
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 4.6vw, 3.6rem);
+    color:var(--ink);
+    margin-bottom:26px;
+  }
+  .hero h1 .lux{
+    font-size:0.88em;
+    display:inline-block;
+  }
+  .hero p.lead{
+    color:var(--ink-dim);
+    font-size:1.08rem;
+    max-width:52ch;
+    margin-bottom:34px;
+  }
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:14px 26px;
+    border-radius:var(--radius);
+    font-weight:700;
+    font-size:0.94rem;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:all .15s ease;
+  }
+  .btn-primary{background:var(--orange-gradient);color:#161311;}
+  .btn-primary:hover{filter: brightness(1.12);}
+  .btn-ghost{border-color:var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--orange);color:var(--orange);}
+
+  /* code window visual */
+  .code-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+  }
+  .code-bar{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:11px 14px;
+    border-bottom:1px solid var(--line);
+    background:#181512;
+  }
+  .code-bar span{width:9px;height:9px;border-radius:50%;background:#3a352e;}
+  .code-bar .fname{margin-left:8px;color:var(--ink-dim);font-family:'Liberation Mono',monospace;font-size:0.75rem;}
+  .code-body{
+    padding:20px 18px;
+    font-family:'Liberation Mono',monospace;
+    font-size:0.82rem;
+    line-height:1.75;
+    color:#c9c3b8;
+    overflow-x:auto;
+  }
+  .code-body .tag{color:#7d9c8c;}
+  .code-body .attr{color:#e0a458;}
+  .code-body .blade{color:var(--orange);}
+  .code-body .str{color:#9fb89a;}
+
+  /* SECTIONS */
+  section{padding:88px 0;border-bottom:1px solid var(--line);}
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:24px;
+    margin-bottom:48px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.3rem);}
+  .section-num{color:var(--orange);}
+  .section-desc{color:var(--ink-dim);max-width:44ch;font-size:0.98rem;}
+
+  /* ABOUT */
+  .about{
+    display:grid;
+    grid-template-columns:0.9fr 1.1fr;
+    gap:60px;
+    align-items:start;
+  }
+  .about-stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    margin-top:32px;
+  }
+  .stat{background:var(--bg);padding:22px;}
+  .stat b{
+    display:block;
+    font-family:'Poppins',sans-serif;
+    color:var(--orange);
+    font-size:1.6rem;
+    margin-bottom:4px;
+  }
+  .stat span{color:var(--ink-dim);font-size:0.85rem;}
+  .about-copy p{color:var(--ink-dim);margin-bottom:18px;font-size:1.02rem;}
+  .about-copy strong{color:var(--ink);font-weight:600;}
+  .stack-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:24px;
+  }
+  .stack-list span{
+    font-family:'Liberation Mono',monospace;
+    font-size:0.78rem;
+    padding:7px 12px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    color:var(--ink-dim);
+  }
+
+  /* CREATIONS */
+  .grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+  }
+  .work-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    position: relative;
+    transition: transform .3s ease;
+  }
+  .work-card:hover{
+    transform: scale(1.1);
+    z-index: 5;
+  }
+  .work-thumb{
+    height:150px;
+    position:relative;
+    background:var(--thumb-gradient);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-bottom:1px solid var(--line);
+  }
+  .work-thumb .wm{
+    font-family:'Poppins',sans-serif;
+    font-size:2.6rem;
+    color:var(--wm-color);
+    letter-spacing:-0.02em;
+  }
+  .work-thumb-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .work-body{padding:22px;display:flex;flex-direction:column;gap:10px;flex:1;}
+  .work-tag{
+    font-family:'Liberation Mono',monospace;
+    font-size:0.72rem;
+    color:var(--orange);
+  }
+  .work-body h3{font-size:1.15rem;font-family:'Carlito',sans-serif;font-weight:700;}
+  .work-body p{color:var(--ink-dim);font-size:0.92rem;flex:1;}
+  .work-meta{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:6px;
+  }
+  .work-meta span{
+    font-size:0.72rem;
+    color:var(--ink-dim);
+    border:1px solid var(--line);
+    padding:4px 9px;
+    border-radius:20px;
+  }
+  
+
+  /* TESTIMONIALS */
+  .testi-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+  }
+  .testi-card{
+    background:var(--bg-alt);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:26px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    transition: transform .25s ease;
+  }
+  .testi-card:hover{
+    transform: translateY(-10px);
+  }
+  .testi-mark{color:var(--orange);font-family:'Poppins',sans-serif;font-size:1.8rem;line-height:1;}
+  .testi-card p{color:var(--ink);font-size:0.96rem;flex:1;}
+  .testi-person{display:flex;align-items:center;gap:12px;}
+  .testi-avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--orange-gradient);
+    color:#161311;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;
+    font-size:0.85rem;
+  }
+  .testi-person b{display:block;font-size:0.88rem;}
+  .testi-person span{color:var(--ink-dim);font-size:0.78rem;}
+
+  /* CONTACT */
+  .contact-wrap{
+    display:grid;
+    grid-template-columns:0.85fr 1.15fr;
+    gap:56px;
+  }
+  .contact-info p{color:var(--ink-dim);margin-bottom:28px;max-width:40ch;}
+  .info-line{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    padding:16px 0;
+    border-top:1px solid var(--line);
+  }
+  .info-line:last-child{border-bottom:1px solid var(--line);}
+  .info-line .ico{color:var(--orange);font-family:'Liberation Mono',monospace;font-size:0.85rem;padding-top:2px;}
+  .info-line div b{display:block;font-size:0.92rem;margin-bottom:2px;}
+  .info-line div span{color:var(--ink-dim);font-size:0.86rem;}
+
+  form{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:32px;
+  }
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;
+    font-size:0.82rem;
+    color:var(--ink-dim);
+    margin-bottom:8px;
+    font-family:'Liberation Mono',monospace;
+  }
+  .field input, .field textarea{
+    width:100%;
+    background:var(--bg);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:13px 14px;
+    border-radius:4px;
+    font-family:'Carlito',sans-serif;
+    font-size:0.95rem;
+    transition:border-color .15s ease;
+  }
+  .field input:focus, .field textarea:focus{
+    outline:none;
+    border-color:var(--orange);
+  }
+  .field textarea{resize:vertical;min-height:130px;}
+  /* honeypot anti-spam field, hidden from humans */
+  .hp{
+    position:absolute;
+    left:-9999px;
+    width:1px;height:1px;
+    overflow:hidden;
+  }
+  .submit-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .form-msg{font-size:0.85rem;}
+  .form-msg.ok{color:#7fb87a;}
+  .form-msg.err{color:#e0685a;}
+  button[type="submit"]{
+    font-family:'Carlito',sans-serif;
+    border:none;
+  }
+  button[type="submit"]:disabled{opacity:0.6;cursor:not-allowed;}
+
+  footer{padding:48px 0 32px;}
+  .footer-grid{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:28px;
+    padding-bottom:28px;
+    border-bottom:1px solid var(--line);
+  }
+  .footer-brand .logo{margin-bottom:12px;}
+  .footer-brand p{color:var(--ink-dim);font-size:0.88rem;max-width:32ch;}
+  .footer-col b{
+    display:block;
+    font-size:0.78rem;
+    color:var(--ink-dim);
+    font-family:'Liberation Mono',monospace;
+    margin-bottom:12px;
+  }
+  .footer-col p, .footer-col a{
+    display:block;
+    color:var(--ink);
+    font-size:0.9rem;
+    margin-bottom:6px;
+  }
+  .footer-col a:hover{color:var(--orange);}
+  .footer-bottom{
+    padding-top:22px;
+    display:flex;
+    justify-content:space-between;
+    color:var(--ink-dim);
+    font-size:0.8rem;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+
+  @media(max-width:860px){
+    .hero .wrap{grid-template-columns:1fr;}
+    .about{grid-template-columns:1fr;}
+    .contact-wrap{grid-template-columns:1fr;}
+    .grid-3{grid-template-columns:1fr;}
+    .testi-grid{grid-template-columns:1fr;}
+    .nav-links{
+      position:fixed;
+      top:64px;left:0;right:0;
+      background:var(--bg);
+      flex-direction:column;
+      padding:22px 28px;
+      border-bottom:1px solid var(--line);
+      gap:18px;
+      transform:translateY(-130%);
+      transition:transform .2s ease;
+    }
+    .nav-links.open{transform:translateY(0);}
+    .nav-cta{display:none;}
+    .burger{display:block;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="#top" class="logo"><img src="images/logo-dark.png" alt="OxenFlace" class="brand-logo"></a>
+    <div class="nav-links" id="navLinks">
+      <a href="#top" data-i18n="nav.home">Accueil</a>
+      <a href="#apropos" data-i18n="nav.about">À propos</a>
+      <a href="#creations" data-i18n="nav.work">Créations</a>
+      <a href="#temoignages" data-i18n="nav.reviews">Retours</a>
+      <a href="#contact" data-i18n="nav.contact">Contact</a>
+    </div>
+    
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Passer en mode clair">☀️</button>
+      <button class="theme-toggle lang-toggle" id="langToggle" aria-label="Switch to English">FR</button>
+      <button class="burger" id="burgerBtn" data-i18n-aria="nav.openMenu" aria-label="Ouvrir le menu">☰</button>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow mono" data-i18n="hero.eyebrow">Développeur freelance · Madagascar</div>
+        <h1 data-i18n-html="hero.title">Un site web ne doit pas seulement s'afficher.<span class="lux"> Il doit répondre aux besoins. </span></h1>
+        <p class="lead" data-i18n="hero.lead">Sites web interactifs sur mesure avec Laravel 12 & Blade, avec une attention particulière à la simplicité, aux performances et à l'expérience utilisateur.</p>
+        <div class="hero-actions">
+          <a href="#contact" class="btn btn-primary" data-i18n="hero.ctaPrimary">Discuter de mon projet</a>
+          <a href="#creations" class="btn btn-ghost" data-i18n="hero.ctaGhost">Voir mes créations</a>
+        </div>
+      </div>
+      <div class="code-card">
+        <div class="code-bar">
+          <span></span><span></span><span></span>
+          <span class="fname">contact.blade.php</span>
+        </div>
+        <div class="code-body">
+&lt;<span class="tag">form</span> <span class="attr">method</span>=<span class="str">"POST"</span>&gt;<br>
+&nbsp;&nbsp;<span class="blade">@csrf</span><br>
+&nbsp;&nbsp;&lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="str">"email"</span> /&gt;<br>
+&nbsp;&nbsp;&lt;<span class="tag">textarea</span> <span class="attr">name</span>=<span class="str">"message"</span>&gt;&lt;/<span class="tag">textarea</span>&gt;<br>
+&nbsp;&nbsp;<span class="blade">@if</span> ($sent)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="tag">p</span>&gt;<span data-i18n="hero.codeSent">Message envoyé ✓</span>&lt;/<span class="tag">p</span>&gt;<br>
+&nbsp;&nbsp;<span class="blade">@endif</span><br>
+&lt;/<span class="tag">form</span>&gt;
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="apropos">
+    <div class="wrap about">
+      <div>
+        <div class="eyebrow mono" data-i18n-eyebrow="about.eyebrow"><span class="section-num">01</span> — Présentation</div>
+        <h2 data-i18n="about.title">Basé à Antananarivo, je code pour des clients partout.</h2>
+        <div class="about-stats">
+          <div class="stat"><b>Blade</b><span data-i18n="about.stat1">Moteur de template principal</span></div>
+          <div class="stat"><b>100%</b><span data-i18n="about.stat2">Sites sur mesure, zéro thème générique</span></div>
+        </div>
+      </div>
+      <div class="about-copy">
+        <p data-i18n-html="about.p1">Je suis développeur web freelance, spécialisé dans la création de sites web sur mesure avec <strong>Laravel 12</strong> et <strong>Blade</strong>.</p>
+        <p data-i18n="about.p2">Je conçois des sites rapides, clairs et agréables à utiliser, adaptés aux besoins de chaque projet. Je privilégie un developpement simple et propre, afin que votre site soit facile à maintenir et puisse évoluer avec votre activité.</p>
+        <p data-i18n="about.p3">Chaque projet est réalisé avec soin, sans dépendre de thèmes tout faits: l'objectif est de créer une solution qui vous ressemble et qui répond réellement aux besoins de vos visiteurs.</p>
+        <div class="stack-list">
+          <span>Laravel 12</span>
+          <span>Blade</span>
+          <span>PHP</span>
+          <span>MySQL</span>
+          <span>JavaScript</span>
+          <span>Tailwind CSS</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="creations">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow mono" data-i18n-eyebrow="work.eyebrow"><span class="section-num">02</span> — Créations</div>
+          <h2 data-i18n="work.title">Quelques projets récents</h2>
+        </div>
+        <p class="section-desc" data-i18n="work.desc">Un aperçu de sites construits avec Laravel 12 & Blade, du plus simple au plus applicatif.</p>
+      </div>
+      <div class="grid-3">
+        <a href="https://oxenhealth.wasmer.app/" target="_blank" rel="noopener" class="work-card">
+          <div class="work-thumb"><img src="images/oxenhealth.PNG" alt="OxenHealth" class="work-thumb-img"></div>
+          <div class="work-body">
+            <span class="work-tag" data-i18n="work.card1.tag">// santé</span>
+            <h3 data-i18n="work.card1.title">OxenHealth — Suivi santé</h3>
+            <p data-i18n="work.card1.desc">Application de suivi du sommeil, de l'hydratation et de l'activité physique, avec dashboard interactif, graphiques Chart.js, score santé sur 100, insights personnalisés et espaces client/admin séparés.</p>
+            <div class="work-meta"><span>Laravel 12</span><span>Tailwind CSS</span><span>Chart.js</span><span>MySQL</span></div>
+          </div>
+        </a>
+        <a href="https://gamingstore.wasmer.app/" target="_blank" rel="noopener" class="work-card">
+          <div class="work-thumb"><img src="images/gamingstore.PNG" alt="GamingStore" class="work-thumb-img"></div>
+          <div class="work-body">
+            <span class="work-tag" data-i18n="work.card2.tag">// e-commerce gaming</span>
+            <h3 data-i18n="work.card2.title">GamingStore — Plateforme e-commerce gaming</h3>
+            <p data-i18n="work.card2.desc">Vente de PC portables gaming et accessoires, architecture MVC avec séparation stricte client/admin (CRUD produits et stocks, vitrine interactive, panier simulé, points, historique d'achats). Interface responsive Bootstrap, thème sombre violet/cyan, animations JS natif.</p>
+            <div class="work-meta"><span>Laravel 12</span><span>Blade</span><span>MySQL</span></div>
+          </div>
+        </a>
+        <div class="work-card">
+          <div class="work-thumb"><span class="wm">03</span></div>
+          <div class="work-body">
+            <span class="work-tag" data-i18n="work.card3.tag">// vitrine</span>
+            <h3 data-i18n="work.card3.title">Site vitrine interactif</h3>
+            <p data-i18n="work.card3.desc">Landing page animée pour une petite entreprise, pensée pour convertir dès le premier écran.</p>
+            <div class="work-meta"><span>Blade</span><span>JS</span><span>Tailwind</span></div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <section id="temoignages">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow mono" data-i18n-eyebrow="reviews.eyebrow"><span class="section-num">03</span> — Retours</div>
+          <h2 data-i18n="reviews.title">Ce qu'on pense de mon travail</h2>
+        </div>
+      </div>
+      <div class="testi-grid">
+        <div class="testi-card">
+          <div class="testi-mark">"</div>
+          <p data-i18n="reviews.card1.text">Un travail rapide et soigné. Le site charge instantanément et l'espace d'administration est vraiment simple à utiliser au quotidien.</p>
+          <div class="testi-person">
+            <div class="testi-avatar">R</div>
+            <div><b>Rindra A.</b><span data-i18n="reviews.card1.role">Fondatrice, boutique en ligne</span></div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-mark">"</div>
+          <p data-i18n="reviews.card2.text">OxenFlace a compris nos besoins dès le premier échange. Le système de réservation fonctionne sans le moindre bug depuis le lancement.</p>
+          <div class="testi-person">
+            <div class="testi-avatar">H</div>
+            <div><b>Hery M.</b><span data-i18n="reviews.card2.role">Gérant, salon de coiffure</span></div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-mark">"</div>
+          <p data-i18n="reviews.card3.text">Communication claire, délais respectés, et un rendu bien au-dessus de ce qu'on attendait pour un site vitrine.</p>
+          <div class="testi-person">
+            <div class="testi-avatar">N</div>
+            <div><b>Nomena R.</b><span data-i18n="reviews.card3.role">Consultante indépendante</span></div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <section id="contact" style="border-bottom:none;">
+    <div class="wrap contact-wrap">
+      <div class="contact-info">
+        <div class="eyebrow mono" data-i18n-eyebrow="contact.eyebrow"><span class="section-num">04</span> — Contact</div>
+        <h2 data-i18n="contact.title">Un projet en tête ?</h2>
+        <p data-i18n="contact.lead">Laissez votre email et un message décrivant votre besoin — je réponds sous peu.</p>
+        <div class="info-line">
+          <span class="ico">@</span>
+          <div><b data-i18n="contact.emailLabel">Email</b><span>oxenflace@gmail.com</span></div>
+        </div>
+        <div class="info-line">
+          <span class="ico">#</span>
+          <div><b data-i18n="contact.phoneLabel">Téléphone</b><span>+261 38 27 878 73</span></div>
+        </div>
+        <div class="info-line">
+          <span class="ico">/</span>
+          <div><b data-i18n="contact.locationLabel">Localisation</b><span>Andoharanofotsy, Madagascar</span></div>
+        </div>
+      </div>
+
+      <form id="contactForm">
+        <div class="field hp">
+          <label for="company" data-i18n="contact.form.hp">Ne pas remplir</label>
+          <input type="text" id="company" name="botcheck" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="email" data-i18n="contact.form.emailLabel">Votre email</label>
+          <input type="email" id="email" name="email" data-i18n-placeholder="contact.form.emailPlaceholder" placeholder="vous@exemple.com" required>
+        </div>
+        <div class="field">
+          <label for="message" data-i18n="contact.form.messageLabel">Votre message</label>
+          <textarea id="message" name="message" data-i18n-placeholder="contact.form.messagePlaceholder" placeholder="Décrivez votre projet en quelques lignes…" required></textarea>
+        </div>
+        <input type="hidden" name="subject" id="formSubject" value="Nouveau message depuis OxenFlace.com">
+        <input type="hidden" name="from_name" id="formFromName" value="Formulaire OxenFlace">
+        <div class="submit-row">
+          <button type="submit" class="btn btn-primary" id="submitBtn" data-i18n="contact.form.submit">Envoyer le message</button>
+          <span class="form-msg" id="formMsg"></span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#top" class="logo"><img src="images/logo-dark.png" alt="OxenFlace" class="brand-logo"></a>
+        <p data-i18n="footer.tagline">Sites web interactifs, construits sur mesure avec Laravel 12 & Blade.</p>
+      </div>
+      <div class="footer-col">
+        <b data-i18n="footer.navHeading">Navigation</b>
+        <a href="#creations" data-i18n="nav.work">Créations</a>
+        <a href="#apropos" data-i18n="nav.about">À propos</a>
+        <a href="#temoignages" data-i18n="nav.reviews">Retours</a>
+        <a href="#contact" data-i18n="nav.contact">Contact</a>
+      </div>
+      <div class="footer-col">
+        <b data-i18n="footer.contactHeading">Contact</b>
+        <p>oxenflace@gmail.com</p>
+        <p>+261 38 27 878 73</p>
+        <p>Andoharanofotsy, Madagascar</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> OxenFlace. <span data-i18n="footer.rights">Tous droits réservés.</span></span>
+      <span>Andoharanofotsy, Madagascar</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // menu mobile
+  const burger = document.getElementById('burgerBtn');
+  const navLinks = document.getElementById('navLinks');
+  burger.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+  // mode clair / sombre
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const brandLogos = document.querySelectorAll('.brand-logo');
+
+  function currentTheme(){
+    return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+  function applyTheme(theme){
+    brandLogos.forEach(img => {
+      img.src = theme === 'light' ? 'images/logo-light.png' : 'images/logo-dark.png';
+    });
+    themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+    const key = theme === 'light' ? 'theme.toDark' : 'theme.toLight';
+    themeToggle.setAttribute('aria-label', t(key));
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const next = currentTheme() === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    try{ localStorage.setItem('oxenflace-theme', next); }catch(e){}
+    applyTheme(next);
+  });
+
+  // langue FR / EN — dictionnaire local, traduction instantanée, sans réseau
+  const translations = {
+    fr: {
+      'meta.title': "OxenFlace — Sites web interactifs, Laravel 12 & Blade",
+      'meta.description': "OxenFlace, développeur freelance à Madagascar, conçoit des sites web interactifs sur mesure avec Laravel 12 & Blade.",
+      'nav.home': "Accueil",
+      'nav.about': "À propos",
+      'nav.work': "Créations",
+      'nav.reviews': "Retours",
+      'nav.contact': "Contact",
+      'nav.openMenu': "Ouvrir le menu",
+      'theme.toDark': "Passer en mode sombre",
+      'theme.toLight': "Passer en mode clair",
+      'lang.toEnglish': "Passer en anglais",
+      'lang.toFrench': "Passer en français",
+      'hero.eyebrow': "Développeur freelance · Madagascar",
+      'hero.title': 'Un site web ne doit pas seulement s\'afficher.<span class="lux"> Il doit répondre aux besoins. </span>',
+      'hero.lead': "Sites web interactifs sur mesure avec Laravel 12 & Blade, avec une attention particulière à la simplicité, aux performances et à l'expérience utilisateur.",
+      'hero.ctaPrimary': "Discuter de mon projet",
+      'hero.ctaGhost': "Voir mes créations",
+      'hero.codeSent': "Message envoyé ✓",
+      'about.eyebrow': "Présentation",
+      'about.title': "Basé à Antananarivo, je code pour des clients partout.",
+      'about.stat1': "Moteur de template principal",
+      'about.stat2': "Sites sur mesure, zéro thème générique",
+      'about.p1': 'Je suis développeur web freelance, spécialisé dans la création de sites web sur mesure avec <strong>Laravel 12</strong> et <strong>Blade</strong>.',
+      'about.p2': "Je conçois des sites rapides, clairs et agréables à utiliser, adaptés aux besoins de chaque projet. Je privilégie un developpement simple et propre, afin que votre site soit facile à maintenir et puisse évoluer avec votre activité.",
+      'about.p3': "Chaque projet est réalisé avec soin, sans dépendre de thèmes tout faits: l'objectif est de créer une solution qui vous ressemble et qui répond réellement aux besoins de vos visiteurs.",
+      'work.eyebrow': "Créations",
+      'work.title': "Quelques projets récents",
+      'work.desc': "Un aperçu de sites construits avec Laravel 12 & Blade, du plus simple au plus applicatif.",
+      'work.card1.tag': "// santé",
+      'work.card1.title': "OxenHealth — Suivi santé",
+      'work.card1.desc': "Application de suivi du sommeil, de l'hydratation et de l'activité physique, avec dashboard interactif, graphiques Chart.js, score santé sur 100, insights personnalisés et espaces client/admin séparés.",
+      'work.card2.tag': "// e-commerce gaming",
+      'work.card2.title': "GamingStore — Plateforme e-commerce gaming",
+      'work.card2.desc': "Vente de PC portables gaming et accessoires, architecture MVC avec séparation stricte client/admin (CRUD produits et stocks, vitrine interactive, panier simulé, points, historique d'achats). Interface responsive Bootstrap, thème sombre violet/cyan, animations JS natif.",
+      'work.card3.tag': "// vitrine",
+      'work.card3.title': "Site vitrine interactif",
+      'work.card3.desc': "Landing page animée pour une petite entreprise, pensée pour convertir dès le premier écran.",
+      'reviews.eyebrow': "Retours",
+      'reviews.title': "Ce qu'on pense de mon travail",
+      'reviews.card1.text': "Un travail rapide et soigné. Le site charge instantanément et l'espace d'administration est vraiment simple à utiliser au quotidien.",
+      'reviews.card1.role': "Fondatrice, boutique en ligne",
+      'reviews.card2.text': "OxenFlace a compris nos besoins dès le premier échange. Le système de réservation fonctionne sans le moindre bug depuis le lancement.",
+      'reviews.card2.role': "Gérant, salon de coiffure",
+      'reviews.card3.text': "Communication claire, délais respectés, et un rendu bien au-dessus de ce qu'on attendait pour un site vitrine.",
+      'reviews.card3.role': "Consultante indépendante",
+      'contact.eyebrow': "Contact",
+      'contact.title': "Un projet en tête ?",
+      'contact.lead': "Laissez votre email et un message décrivant votre besoin — je réponds sous peu.",
+      'contact.emailLabel': "Email",
+      'contact.phoneLabel': "Téléphone",
+      'contact.locationLabel': "Localisation",
+      'contact.form.hp': "Ne pas remplir",
+      'contact.form.emailLabel': "Votre email",
+      'contact.form.emailPlaceholder': "vous@exemple.com",
+      'contact.form.messageLabel': "Votre message",
+      'contact.form.messagePlaceholder': "Décrivez votre projet en quelques lignes…",
+      'contact.form.subjectValue': "Nouveau message depuis OxenFlace.com",
+      'contact.form.fromNameValue': "Formulaire OxenFlace",
+      'contact.form.submit': "Envoyer le message",
+      'contact.form.sending': "Envoi en cours…",
+      'contact.form.honeypotOk': "Message envoyé.",
+      'contact.form.success': "Merci, votre message a bien été envoyé ✓",
+      'contact.form.error': "Une erreur est survenue, veuillez réessayer.",
+      'contact.form.networkError': "Impossible d'envoyer le message. Vérifiez votre connexion.",
+      'footer.tagline': "Sites web interactifs, construits sur mesure avec Laravel 12 & Blade.",
+      'footer.navHeading': "Navigation",
+      'footer.contactHeading': "Contact",
+      'footer.rights': "Tous droits réservés."
+    },
+    en: {
+      'meta.title': "OxenFlace — Interactive Websites, Laravel 12 & Blade",
+      'meta.description': "OxenFlace, freelance developer in Madagascar, builds custom interactive websites with Laravel 12 & Blade.",
+      'nav.home': "Home",
+      'nav.about': "About",
+      'nav.work': "Work",
+      'nav.reviews': "Reviews",
+      'nav.contact': "Contact",
+      'nav.openMenu': "Open menu",
+      'theme.toDark': "Switch to dark mode",
+      'theme.toLight': "Switch to light mode",
+      'lang.toEnglish': "Switch to English",
+      'lang.toFrench': "Switch to French",
+      'hero.eyebrow': "Freelance developer · Madagascar",
+      'hero.title': 'A website shouldn\'t just look good.<span class="lux"> It should meet real needs. </span>',
+      'hero.lead': "Custom interactive websites built with Laravel 12 & Blade, with close attention to simplicity, performance, and user experience.",
+      'hero.ctaPrimary': "Discuss my project",
+      'hero.ctaGhost': "See my work",
+      'hero.codeSent': "Message sent ✓",
+      'about.eyebrow': "Overview",
+      'about.title': "Based in Antananarivo, I code for clients everywhere.",
+      'about.stat1': "Main templating engine",
+      'about.stat2': "Custom-built sites, zero generic themes",
+      'about.p1': 'I\'m a freelance web developer specializing in custom website creation with <strong>Laravel 12</strong> and <strong>Blade</strong>.',
+      'about.p2': "I design fast, clear, and pleasant-to-use sites, tailored to each project's needs. I favor simple, clean development so your site stays easy to maintain and can grow with your business.",
+      'about.p3': "Every project is crafted with care, without relying on pre-built themes: the goal is to create a solution that reflects who you are and truly meets your visitors' needs.",
+      'work.eyebrow': "Work",
+      'work.title': "A few recent projects",
+      'work.desc': "A look at sites built with Laravel 12 & Blade, from the simplest to the most complex.",
+      'work.card1.tag': "// health",
+      'work.card1.title': "OxenHealth — Health tracking",
+      'work.card1.desc': "Sleep, hydration, and physical activity tracker with an interactive dashboard, Chart.js graphs, a health score out of 100, personalized insights, and separate client/admin spaces.",
+      'work.card2.tag': "// gaming e-commerce",
+      'work.card2.title': "GamingStore — Gaming e-commerce platform",
+      'work.card2.desc': "Sales platform for gaming laptops and accessories, with a strict MVC client/admin split (full product & stock CRUD, interactive storefront, simulated cart, loyalty points, purchase history). Responsive Bootstrap UI, dark purple/cyan theme, native JS animations.",
+      'work.card3.tag': "// showcase",
+      'work.card3.title': "Interactive showcase site",
+      'work.card3.desc': "Animated landing page for a small business, designed to convert from the very first screen.",
+      'reviews.eyebrow': "Reviews",
+      'reviews.title': "What people say about my work",
+      'reviews.card1.text': "Fast, careful work. The site loads instantly and the admin panel is genuinely easy to use day to day.",
+      'reviews.card1.role': "Founder, online store",
+      'reviews.card2.text': "OxenFlace understood our needs from the very first conversation. The booking system has run without a single bug since launch.",
+      'reviews.card2.role': "Owner, hair salon",
+      'reviews.card3.text': "Clear communication, deadlines met, and a result well above what we expected for a showcase site.",
+      'reviews.card3.role': "Independent consultant",
+      'contact.eyebrow': "Contact",
+      'contact.title': "Got a project in mind?",
+      'contact.lead': "Leave your email and a message describing what you need — I'll get back to you shortly.",
+      'contact.emailLabel': "Email",
+      'contact.phoneLabel': "Phone",
+      'contact.locationLabel': "Location",
+      'contact.form.hp': "Leave this blank",
+      'contact.form.emailLabel': "Your email",
+      'contact.form.emailPlaceholder': "you@example.com",
+      'contact.form.messageLabel': "Your message",
+      'contact.form.messagePlaceholder': "Describe your project in a few lines…",
+      'contact.form.subjectValue': "New message from OxenFlace.com",
+      'contact.form.fromNameValue': "OxenFlace contact form",
+      'contact.form.submit': "Send message",
+      'contact.form.sending': "Sending…",
+      'contact.form.honeypotOk': "Message sent.",
+      'contact.form.success': "Thanks, your message has been sent ✓",
+      'contact.form.error': "Something went wrong, please try again.",
+      'contact.form.networkError': "Couldn't send the message. Please check your connection.",
+      'footer.tagline': "Interactive websites, custom-built with Laravel 12 & Blade.",
+      'footer.navHeading': "Navigation",
+      'footer.contactHeading': "Contact",
+      'footer.rights': "All rights reserved."
+    }
+  };
+
+  let currentLang = 'fr';
+
+  function t(key){
+    const dict = translations[currentLang] || translations.fr;
+    return dict[key] !== undefined ? dict[key] : (translations.fr[key] || key);
+  }
+
+  function setEyebrowContent(el, text){
+    const num = el.querySelector('.section-num');
+    if (num) {
+      el.innerHTML = '<span class="section-num">' + num.textContent + '</span> — ' + text;
+    } else {
+      el.textContent = text;
+    }
+  }
+
+  function applyLanguage(lang){
+    currentLang = translations[lang] ? lang : 'fr';
+    root.setAttribute('lang', currentLang);
+
+    document.title = t('meta.title');
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', t('meta.description'));
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = t(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
+    document.querySelectorAll('[data-i18n-eyebrow]').forEach(el => {
+      setEyebrowContent(el, t(el.getAttribute('data-i18n-eyebrow')));
+    });
+
+    const subjectInput = document.getElementById('formSubject');
+    const fromNameInput = document.getElementById('formFromName');
+    if (subjectInput) subjectInput.value = t('contact.form.subjectValue');
+    if (fromNameInput) fromNameInput.value = t('contact.form.fromNameValue');
+
+    if (!submitBtn.disabled) submitBtn.textContent = t('contact.form.submit');
+
+    langToggle.textContent = currentLang.toUpperCase();
+    langToggle.setAttribute('aria-label', currentLang === 'fr' ? t('lang.toEnglish') : t('lang.toFrench'));
+    applyTheme(currentTheme());
+  }
+
+  const langToggle = document.getElementById('langToggle');
+
+  // formulaire de contact -> Web3Forms (gratuit, sans backend, envoie vers oxenflace@gmail.com)
+  const form = document.getElementById('contactForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const formMsg = document.getElementById('formMsg');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    // piège à spam (honeypot) : si rempli, on ignore silencieusement
+    if (form.botcheck.value !== '') {
+      formMsg.textContent = t('contact.form.honeypotOk');
+      formMsg.className = 'form-msg ok';
+      form.reset();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = t('contact.form.sending');
+    formMsg.textContent = '';
+    formMsg.className = 'form-msg';
+
+    const formData = new FormData(form);
+    // Clé d'accès Web3Forms : à remplacer avant mise en ligne (voir DEPLOIEMENT.md)
+    formData.append('access_key', 'b07acb76-b534-452d-aca5-cf9723fd8a21');
+    formData.append('to_email', 'oxenflace@gmail.com');
+
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        formMsg.textContent = t('contact.form.success');
+        formMsg.className = 'form-msg ok';
+        form.reset();
+      } else {
+        formMsg.textContent = t('contact.form.error');
+        formMsg.className = 'form-msg err';
+      }
+    } catch (err) {
+      formMsg.textContent = t('contact.form.networkError');
+      formMsg.className = 'form-msg err';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = t('contact.form.submit');
+    }
+  });
+
+  // initialisation langue (après déclaration de submitBtn/form/formMsg ci-dessus)
+  let storedLang = 'fr';
+  try{
+    storedLang = localStorage.getItem('oxenflace-lang') === 'en' ? 'en' : 'fr';
+  }catch(e){}
+  applyLanguage(storedLang);
+
+  langToggle.addEventListener('click', () => {
+    const next = currentLang === 'fr' ? 'en' : 'fr';
+    try{ localStorage.setItem('oxenflace-lang', next); }catch(e){}
+    applyLanguage(next);
+  });
+  const eyebrows = document.querySelectorAll(".eyebrow");
+
+const DURATION = 1000;
+const CHAR_TIME = 40; // durée du "A B C..."
+
+
+function animateEyebrow(eyebrow) {
+
+    // Une seule animation
+    if (eyebrow.dataset.animated) return;
+
+    eyebrow.dataset.animated = "true";
+
+
+    /*
+     * On récupère séparément :
+     * 01
+     * -
+     * Présentation
+     */
+
+    const sectionNum = eyebrow.querySelector(".section-num");
+
+    // On récupère uniquement le texte qui n'est pas dans .section-num
+    const textNode = [...eyebrow.childNodes]
+        .find(node => node.nodeType === Node.TEXT_NODE);
+
+    if (!sectionNum || !textNode) return;
+
+
+    const number = sectionNum.textContent;
+    const text = textNode.textContent;
+
+
+    // On vide le numéro
+    sectionNum.textContent = "";
+
+
+    // On vide le texte original
+    textNode.textContent = "";
+
+
+    // Toutes les lettres à animer
+    const chars = [];
+
+
+    // Numéro : 0 → 01
+    for (const char of number) {
+
+        const span = document.createElement("span");
+
+        span.className = "decrypt-char";
+        span.textContent = "";
+
+        sectionNum.appendChild(span);
+
+        chars.push({
+            element: span,
+            target: char
+        });
+    }
+
+
+    // Texte : - Présentation
+    for (const char of text) {
+
+        if (char === " ") {
+            textNode.parentNode.insertBefore(
+                document.createTextNode(" "),
+                textNode
+            );
+            continue;
+        }
+
+        const span = document.createElement("span");
+
+        span.className = "decrypt-char";
+        span.textContent = "";
+
+        textNode.parentNode.insertBefore(span, textNode);
+
+        chars.push({
+            element: span,
+            target: char
+        });
+    }
+
+
+    // Suppression du node texte vide
+    textNode.remove();
+
+
+    // Temps de départ de chaque caractère
+    const delay =
+        chars.length > 1
+            ? (DURATION - CHAR_TIME) / (chars.length - 1)
+            : 0;
+
+
+    chars.forEach((char, index) => {
+
+        setTimeout(() => {
+            decryptChar(char.element, char.target);
+        }, index * delay);
+
+    });
+}
+
+
+function decryptChar(element, target) {
+
+    // -, ., espaces, etc.
+    if (!/[a-zA-Z0-9À-ÿ]/.test(target)) {
+        element.textContent = target;
+        return;
+    }
+
+
+    const normalized = target
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase();
+
+
+    // Chiffres
+    if (/[0-9]/.test(target)) {
+
+        const finalNumber = Number(target);
+        let current = 0;
+
+        const interval = setInterval(() => {
+
+            element.textContent = current;
+
+            current++;
+
+            if (current > finalNumber) {
+
+                clearInterval(interval);
+                element.textContent = target;
+
+            }
+
+        }, CHAR_TIME / (finalNumber + 1));
+
+        return;
+    }
+
+
+    // Lettres
+    const finalIndex =
+        normalized.charCodeAt(0) - 65;
+
+    let current = 0;
+
+
+    const interval = setInterval(() => {
+
+        element.textContent =
+            String.fromCharCode(65 + current);
+
+        current++;
+
+
+        if (current > finalIndex) {
+
+            clearInterval(interval);
+
+            // Remet la vraie lettre
+            element.textContent = target;
+        }
+
+    }, CHAR_TIME / Math.max(finalIndex + 1, 1));
+}
+
+
+
+// -------------------------------------
+// Déclenchement quand visible
+// -------------------------------------
+
+const observer = new IntersectionObserver(
+    (entries) => {
+
+        entries.forEach(entry => {
+
+            if (!entry.isIntersecting) return;
+
+            animateEyebrow(entry.target);
+
+            // Ne recommence pas quand on remonte/redescend
+            observer.unobserve(entry.target);
+
+        });
+
+    },
+    {
+        threshold: 0.35
+    }
+);
+
+
+eyebrows.forEach(eyebrow => {
+    observer.observe(eyebrow);
+});
+
+</script>
+
+</body>
+</html>
